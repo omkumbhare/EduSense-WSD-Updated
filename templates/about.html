@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}EduSense — Methodology & Viva Guide{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-lg-10">
+        <h2 class="fw-bold mb-2">
+            <i class="fa-solid fa-book-open text-cyan me-2"></i> Methodology, Architecture & Viva Guide
+        </h2>
+        <p class="text-muted">Comprehensive technical documentation, mathematical formulations, system architecture, and viva examination guide for college evaluators.</p>
+    </div>
+</div>
+
+<!-- Tabs Navigation -->
+<ul class="nav nav-pills mb-4" id="aboutTabs" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active" id="math-tab" data-bs-toggle="pill" data-bs-target="#math-content">
+            <i class="fa-solid fa-calculator me-2"></i> Mathematical Model
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="arch-tab" data-bs-toggle="pill" data-bs-target="#arch-content">
+            <i class="fa-solid fa-sitemap me-2"></i> Architecture & Flow
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="viva-tab" data-bs-toggle="pill" data-bs-target="#viva-content">
+            <i class="fa-solid fa-clipboard-question me-2"></i> Viva Q&A Guide
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="slides-tab" data-bs-toggle="pill" data-bs-target="#slides-content">
+            <i class="fa-solid fa-sliders me-2"></i> Slide Presentation
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="aboutTabContent">
+
+    <!-- Tab 1: Mathematical Model -->
+    <div class="tab-pane fade show active" id="math-content">
+        <div class="glass-card p-4 mb-4">
+            <h4 class="fw-bold text-cyan mb-3">Core Scoring Formulation</h4>
+            <p class="text-light">
+                Given an educational transcript sentence $T$ containing an ambiguous target word $w$, the engine extracts a surrounding context window $C$. For every candidate WordNet synset $s \in \text{Synsets}(w)$, the system calculates a multi-factor transparent overlap score:
+            </p>
+
+            <div class="p-3 bg-dark bg-opacity-75 rounded border border-secondary mb-4 font-monospace text-info">
+                Final Score(s) = &alpha; &middot; DirectOverlap(C, G<sub>s</sub>) + &beta; &middot; LemmaOverlap(C<sub>lemma</sub>, G<sub>s,lemma</sub>) + &gamma; &middot; ExampleOverlap(C<sub>lemma</sub>, E<sub>s,lemma</sub>) + &delta; &middot; ThesaurusOverlap(S<sub>context</sub>, G<sub>s,lemma</sub>) + &epsilon; &middot; HypernymOverlap(C<sub>lemma</sub>, H<sub>s</sub>)
+            </div>
+
+            <h5 class="fw-bold text-light mt-4 mb-3">Variable Definitions & Default Parameters:</h5>
+            <div class="table-responsive">
+                <table class="table table-dark-custom align-middle">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Weight</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-monospace text-cyan">&alpha; (alpha)</td>
+                            <td class="font-monospace">1.5</td>
+                            <td>Exact direct token overlap between filtered transcript context $C$ and WordNet gloss definition tokens $G_s$.</td>
+                        </tr>
+                        <tr>
+                            <td class="font-monospace text-cyan">&beta; (beta)</td>
+                            <td class="font-monospace">1.2</td>
+                            <td>Lemma-level overlap between context lemmas $C_{\text{lemma}}$ and candidate gloss lemmas $G_{s,\text{lemma}}$.</td>
+                        </tr>
+                        <tr>
+                            <td class="font-monospace text-cyan">&gamma; (gamma)</td>
+                            <td class="font-monospace">1.0</td>
+                            <td>Example sentence lemma overlap between context lemmas $C_{\text{lemma}}$ and WordNet example sentence lemmas $E_{s,\text{lemma}}$.</td>
+                        </tr>
+                        <tr>
+                            <td class="font-monospace text-cyan">&delta; (delta)</td>
+                            <td class="font-monospace">0.7</td>
+                            <td>Thesaurus synonym expansion overlap between context synonyms $S_{\text{context}}$ and candidate gloss lemmas.</td>
+                        </tr>
+                        <tr>
+                            <td class="font-monospace text-cyan">&epsilon; (epsilon)</td>
+                            <td class="font-monospace">0.5</td>
+                            <td>Hypernym & hyponym hierarchy token overlap matching general academic domains.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h5 class="fw-bold text-light mt-4 mb-2">Relative Confidence Calculation:</h5>
+            <p class="text-muted small mb-2">
+                Relative confidence measures how strongly the predicted sense dominates alternative senses:
+            </p>
+            <div class="p-3 bg-dark bg-opacity-75 rounded border border-secondary font-monospace text-warning">
+                Relative Confidence = Top Score / &sum; (All Candidate Scores)
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 2: Architecture & Flow -->
+    <div class="tab-pane fade" id="arch-content">
+        <div class="glass-card p-4 mb-4">
+            <h4 class="fw-bold text-cyan mb-3">System Architecture Diagram</h4>
+            <pre class="p-3 text-cyan">
+Educational Transcript Input
+          │
+          ▼
+┌──────────────────────────┐
+│   Text Preprocessing     │ (Lowercasing, Tokenization, Stopword Filter, Lemmatization)
+└─────────┬────────────────┘
+          │
+          ▼
+┌──────────────────────────┐
+│   Context Extractor      │ (Configurable window ±N words around target occurrence)
+└─────────┬────────────────┘
+          │
+          ▼
+┌──────────────────────────┐
+│  WordNet Synset Retrieval│ (Fetch Candidate Senses, Glosses, Examples, Hypernyms)
+└─────────┬────────────────┘
+          │
+          ▼
+┌──────────────────────────┐
+│ Thesaurus Synonym Engine │ (Expand Context Vocabulary with WordNet Synonym Sets)
+└─────────┬────────────────┘
+          │
+          ▼
+┌──────────────────────────┐
+│ Overlap Scoring Engine   │ (Compute Direct, Lemma, Example, Synonym & Hypernym Scores)
+└─────────┬────────────────┘
+          │
+          ▼
+┌──────────────────────────┐
+│   Sense Ranking & XAI    │ (Rank descending, compute Relative Confidence & Evidence)
+└─────────┬────────────────┘
+          │
+          ▼
+Predicted Word Sense + Explanation UI
+            </pre>
+        </div>
+    </div>
+
+    <!-- Tab 3: Viva Q&A Guide -->
+    <div class="tab-pane fade" id="viva-content">
+        <div class="glass-card p-4">
+            <h4 class="fw-bold text-cyan mb-4"><i class="fa-solid fa-graduation-cap me-2"></i> Evaluator Viva Examination Questions & Answers</h4>
+            
+            <div class="accordion accordion-flush" id="vivaAccordion">
+                <div class="accordion-item bg-transparent text-light border-bottom border-secondary">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-transparent text-cyan fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#viva1">
+                            Q1: What is Word Sense Disambiguation (WSD)?
+                        </button>
+                    </h2>
+                    <div id="viva1" class="accordion-collapse collapse" data-bs-parent="#vivaAccordion">
+                        <div class="accordion-body text-muted">
+                            WSD is an open problem in Natural Language Processing (NLP) that aims to identify which sense of a polysemous word (a word with multiple meanings, e.g. 'bank' as river bank vs financial bank) is used in a given sentence context.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-transparent text-light border-bottom border-secondary">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-transparent text-cyan fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#viva2">
+                            Q2: How does your dictionary-based algorithm differ from standard Lesk?
+                        </button>
+                    </h2>
+                    <div id="viva2" class="accordion-collapse collapse" data-bs-parent="#vivaAccordion">
+                        <div class="accordion-body text-muted">
+                            Standard Lesk counts exact raw word overlaps between context and candidate definitions. Our engine enhances this by adding: 1) Lemma-level matching, 2) Example sentence matching, 3) Thesaurus synonym expansion for context words, 4) Hypernym hierarchy matching, and 5) Target self-match exclusion to prevent bias.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-transparent text-light border-bottom border-secondary">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-transparent text-cyan fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#viva3">
+                            Q3: Why did you not use Large Language Models (LLMs) like OpenAI/Gemini for WSD?
+                        </button>
+                    </h2>
+                    <div id="viva3" class="accordion-collapse collapse" data-bs-parent="#vivaAccordion">
+                        <div class="accordion-body text-muted">
+                            The objective of an academic mini-project is to demonstrate core NLP principles, algorithms, and transparent explainable decision logic. LLM APIs act as black boxes. By using WordNet and explicit gloss overlap scoring, every step of the computation is reproducible, mathematical, and inspectable.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-transparent text-light border-bottom border-secondary">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-transparent text-cyan fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#viva4">
+                            Q4: What is WordNet?
+                        </button>
+                    </h2>
+                    <div id="viva4" class="accordion-collapse collapse" data-bs-parent="#vivaAccordion">
+                        <div class="accordion-body text-muted">
+                            WordNet is a large lexical database of English developed at Princeton University. Nouns, verbs, adjectives, and adverbs are grouped into sets of cognitive synonyms called <strong>synsets</strong>, each expressing a distinct concept with definitions, examples, and semantic relations.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-transparent text-light border-bottom border-secondary">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-transparent text-cyan fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#viva5">
+                            Q5: What is Relative Confidence and how is it calculated?
+                        </button>
+                    </h2>
+                    <div id="viva5" class="accordion-collapse collapse" data-bs-parent="#vivaAccordion">
+                        <div class="accordion-body text-muted">
+                            Relative confidence is computed as the top candidate's final score divided by the sum of all candidate scores for that target word. It reflects how clearly the winner outperformed runner-up candidate senses without claiming to be a calibrated probabilistic distribution.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 4: Slide Presentation Sitemap -->
+    <div class="tab-pane fade" id="slides-content">
+        <div class="glass-card p-4 mb-4">
+            <h4 class="fw-bold text-cyan mb-3"><i class="fa-solid fa-desktop me-2"></i> 13-Slide Presentation Sitemap</h4>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <ol class="list-group list-group-numbered list-group-flush bg-transparent">
+                        <li class="list-group-item bg-transparent text-light">Title Slide: Project Title & Team Details</li>
+                        <li class="list-group-item bg-transparent text-light">Problem Introduction: Ambiguity in Educational Transcripts</li>
+                        <li class="list-group-item bg-transparent text-light">Problem Understanding & Polysemy</li>
+                        <li class="list-group-item bg-transparent text-light">Need for WSD in Academic NLP</li>
+                        <li class="list-group-item bg-transparent text-light">Scope of Solution</li>
+                        <li class="list-group-item bg-transparent text-light">Existing Solutions & Research Survey</li>
+                        <li class="list-group-item bg-transparent text-light">Proposed System: EduSense Architecture</li>
+                    </ol>
+                </div>
+                <div class="col-md-6">
+                    <ol start="8" class="list-group list-group-numbered list-group-flush bg-transparent">
+                        <li class="list-group-item bg-transparent text-light">System Architecture & Pipeline Diagram</li>
+                        <li class="list-group-item bg-transparent text-light">Algorithm & Mathematical Model</li>
+                        <li class="list-group-item bg-transparent text-light">Web Application Interface & XAI</li>
+                        <li class="list-group-item bg-transparent text-light">Empirical Benchmark Results & Comparison</li>
+                        <li class="list-group-item bg-transparent text-light">Conclusion, Learning & Future Scope</li>
+                        <li class="list-group-item bg-transparent text-light">Live Demonstration & Q&A</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

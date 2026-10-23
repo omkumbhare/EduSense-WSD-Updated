@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}EduSense — Benchmark Evaluation{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-lg-8">
+        <h2 class="fw-bold mb-2">
+            <i class="fa-solid fa-vial-circle-check text-cyan me-2"></i> Empirical Evaluation Dashboard
+        </h2>
+        <p class="text-muted mb-0">Quantitative benchmark performance of EduSense Custom WSD engine compared against NLTK Simplified Lesk baseline on 25 educational test sentences.</p>
+    </div>
+</div>
+
+<!-- Row 1: Key Evaluation Metric Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="glass-card stat-box h-100">
+            <div class="stat-number text-success">{{ eval_results.custom_accuracy }}%</div>
+            <div class="stat-label">EduSense Custom Accuracy</div>
+            <div class="small text-muted mt-2">({{ eval_results.custom_correct }} / {{ eval_results.total_samples }} Correct)</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass-card stat-box h-100">
+            <div class="stat-number text-warning">{{ eval_results.baseline_accuracy }}%</div>
+            <div class="stat-label">NLTK Lesk Baseline</div>
+            <div class="small text-muted mt-2">({{ eval_results.baseline_correct }} / {{ eval_results.total_samples }} Correct)</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass-card stat-box h-100">
+            <div class="stat-number text-info">{{ eval_results.avg_candidate_senses }}</div>
+            <div class="stat-label">Avg Senses per Word</div>
+            <div class="small text-muted mt-2">WordNet Candidate Search Space</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass-card stat-box h-100">
+            <div class="stat-number " style="background: linear-gradient(135deg, #8b5cf6, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                {{ (eval_results.avg_confidence * 100)|round(1) }}%
+            </div>
+            <div class="stat-label">Avg Relative Confidence</div>
+            <div class="small text-muted mt-2">Mean Top Score Ratio</div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 2: Interactive Chart.js Graphs -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100">
+            <h5 class="fw-bold mb-3 text-light">
+                <i class="fa-solid fa-chart-column text-cyan me-2"></i> Accuracy Comparison (% Correct)
+            </h5>
+            <div style="height: 280px; position: relative;">
+                <canvas id="accuracyChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100">
+            <h5 class="fw-bold mb-3 text-light">
+                <i class="fa-solid fa-pie-chart text-cyan me-2"></i> Custom WSD Prediction Breakdown
+            </h5>
+            <div style="height: 280px; position: relative;">
+                <canvas id="breakdownChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 3: Failure & Error Analysis Card -->
+<div class="glass-card p-4 mb-5">
+    <h5 class="fw-bold mb-3 text-light">
+        <i class="fa-solid fa-bug text-warning me-2"></i> Qualitative Failure & Error Analysis
+    </h5>
+    <p class="text-muted small">
+        The dictionary/thesaurus WSD method relies on textual context gloss overlap. Cases where custom predictions diverged from gold synsets occur primarily due to:
+    </p>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="p-3 bg-dark bg-opacity-50 rounded border border-secondary">
+                <h6 class="fw-bold text-warning mb-1"><i class="fa-solid fa-comment-slash me-1"></i> Sparse Gloss Vocabulary</h6>
+                <p class="small text-muted mb-0">WordNet definitions can be very concise (3–6 words). If context keywords do not explicitly appear in the gloss, overlap defaults to 0.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 bg-dark bg-opacity-50 rounded border border-secondary">
+                <h6 class="fw-bold text-warning mb-1"><i class="fa-solid fa-layer-group me-1"></i> Fine-Grained WordNet Senses</h6>
+                <p class="small text-muted mb-0">WordNet contains highly granular distinction between related noun senses (e.g. tree as woody plant vs tree as hierarchical data structure).</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 bg-dark bg-opacity-50 rounded border border-secondary">
+                <h6 class="fw-bold text-warning mb-1"><i class="fa-solid fa-maximize me-1"></i> Context Window Boundary</h6>
+                <p class="small text-muted mb-0">Short sentences with limited surrounding words may lack domain-specific tokens needed to tip the overlap score.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 4: Detailed 25-Sample Evaluation Dataset Table -->
+<div class="glass-card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-light mb-0">
+            <i class="fa-solid fa-table-list text-cyan me-2"></i> Detailed 25-Sample Benchmark Test Results
+        </h5>
+        <span class="badge bg-secondary font-monospace">Dataset: data/annotated/evaluation_dataset.csv</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-dark-custom align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 40px;">#</th>
+                    <th style="width: 100px;">Target</th>
+                    <th>Transcript Sentence</th>
+                    <th style="width: 160px;">Gold Synset</th>
+                    <th style="width: 160px;">EduSense Predicted</th>
+                    <th style="width: 140px;">NLTK Lesk</th>
+                    <th style="width: 90px;" class="text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in eval_results.detailed_results %}
+                <tr>
+                    <td class="font-monospace text-muted">{{ item.id }}</td>
+                    <td><span class="badge bg-cyan bg-opacity-25 text-info font-monospace">{{ item.target_word }}</span></td>
+                    <td class="small text-light">{{ item.sentence }}</td>
+                    <td class="font-monospace small text-muted">{{ item.gold_synset }}</td>
+                    <td class="font-monospace small fw-bold {% if item.custom_correct %}text-success{% else %}text-danger{% endif %}">
+                        {{ item.custom_predicted }}
+                    </td>
+                    <td class="font-monospace small text-muted">{{ item.baseline_predicted }}</td>
+                    <td class="text-center">
+                        {% if item.custom_correct %}
+                            <span class="badge bg-success"><i class="fa-solid fa-check me-1"></i> Correct</span>
+                        {% else %}
+                            <span class="badge bg-danger"><i class="fa-solid fa-xmark me-1"></i> Fail</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Accuracy Bar Chart
+    const ctxAcc = document.getElementById('accuracyChart').getContext('2d');
+    new Chart(ctxAcc, {
+        type: 'bar',
+        data: {
+            labels: ['EduSense Custom WSD (Dictionary + Thesaurus)', 'NLTK Lesk Baseline'],
+            datasets: [{
+                label: 'Accuracy (%)',
+                data: [{{ eval_results.custom_accuracy }}, {{ eval_results.baseline_accuracy }}],
+                backgroundColor: ['rgba(0, 242, 254, 0.7)', 'rgba(245, 158, 11, 0.7)'],
+                borderColor: ['#00f2fe', '#f59e0b'],
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#94a3b8', callback: (v) => v + '%' }
+                },
+                x: {
+                    ticks: { color: '#f8fafc', font: { weight: 'bold' } }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    // 2. Breakdown Donut Chart
+    const ctxBreakdown = document.getElementById('breakdownChart').getContext('2d');
+    new Chart(ctxBreakdown, {
+        type: 'doughnut',
+        data: {
+            labels: ['Correct Predictions', 'Incorrect Predictions'],
+            datasets: [{
+                data: [{{ eval_results.custom_correct }}, {{ eval_results.custom_incorrect }}],
+                backgroundColor: ['#10b981', '#ef4444'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#f8fafc', padding: 20 }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

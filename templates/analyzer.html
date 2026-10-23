@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}EduSense — WSD Analyzer{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Page Header -->
+        <div class="text-center mb-4">
+            <h2 class="fw-bold mb-2"><i class="fa-solid fa-microscope text-cyan me-2"></i> Interactive WSD Analyzer</h2>
+            <p class="text-muted">Enter or select an educational lecture transcript and target word to perform Word Sense Disambiguation.</p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger bg-danger bg-opacity-25 text-light border-danger mb-4">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i> {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Quick Sample Preset Buttons -->
+        <div class="glass-card p-3 mb-4">
+            <span class="small text-muted d-block mb-2 font-monospace text-uppercase"><i class="fa-solid fa-bolt text-warning me-1"></i> Quick Educational Samples:</span>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-custom btn-sm" 
+                    onclick="loadSample('Geologists surveyed the river bank to measure soil erosion along the sloping water edge.', 'bank')">
+                    <i class="fa-solid fa-mountain me-1"></i> Geology: River Bank
+                </button>
+                <button type="button" class="btn btn-outline-custom btn-sm" 
+                    onclick="loadSample('The economics lecture covered how a commercial bank manages monetary deposits and loan interest rates.', 'bank')">
+                    <i class="fa-solid fa-coins me-1"></i> Economics: Money Bank
+                </button>
+                <button type="button" class="btn btn-outline-custom btn-sm" 
+                    onclick="loadSample('Under the microscope the student identified the cell nucleus and membrane structure of the organism.', 'cell')">
+                    <i class="fa-solid fa-dna me-1"></i> Biology: Cell Nucleus
+                </button>
+                <button type="button" class="btn btn-outline-custom btn-sm" 
+                    onclick="loadSample('Industrial engineers visited the manufacturing plant to inspect automated assembly line machinery.', 'plant')">
+                    <i class="fa-solid fa-industry me-1"></i> Engineering: Assembly Plant
+                </button>
+                <button type="button" class="btn btn-outline-custom btn-sm" 
+                    onclick="loadSample('A software bug caused the memory stack to overflow during recursive algorithm execution.', 'memory')">
+                    <i class="fa-solid fa-memory me-1"></i> CS: RAM Memory
+                </button>
+            </div>
+        </div>
+
+        <!-- Analyzer Input Form -->
+        <div class="glass-card p-4">
+            <form action="{{ url_for('analyzer') }}" method="POST">
+                <div class="mb-4">
+                    <label for="transcript" class="form-label fw-bold text-light">
+                        <i class="fa-solid fa-quote-left text-info me-2"></i> Educational Lecture Transcript
+                    </label>
+                    <textarea class="form-control form-control-custom" id="transcript" name="transcript" rows="5" 
+                        placeholder="Paste or type lecture transcript paragraph here..." required>{% if transcript %}{{ transcript }}{% else %}{{ sample_transcript }}{% endif %}</textarea>
+                    <div class="form-text text-muted">Supports science, engineering, finance, computer science, and general academic lecture excerpts.</div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="target_word" class="form-label fw-bold text-light">
+                            <i class="fa-solid fa-crosshairs text-info me-2"></i> Ambiguous Target Word
+                        </label>
+                        <input type="text" class="form-control form-control-custom" id="target_word" name="target_word" 
+                            placeholder="e.g. bank, plant, cell, memory" value="{% if target_word %}{{ target_word }}{% else %}{{ sample_target }}{% endif %}" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="window_size" class="form-label fw-bold text-light d-flex justify-content-between">
+                            <span><i class="fa-solid fa-sliders text-info me-2"></i> Context Window Size</span>
+                            <span id="window_val" class="text-cyan fw-bold">±{% if window_size %}{{ window_size }}{% else %}10{% endif %} words</span>
+                        </label>
+                        <input type="range" class="form-range mt-2" id="window_size" name="window_size" 
+                            min="5" max="25" step="1" value="{% if window_size %}{{ window_size }}{% else %}10{% endif %}">
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-cyan btn-lg">
+                        <i class="fa-solid fa-wand-magic-sparkles me-2"></i> Disambiguate Word Sense
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

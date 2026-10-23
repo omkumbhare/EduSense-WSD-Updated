@@ -1,0 +1,4 @@
+Session: Computer Systems Architecture Lecture 19 - Memory Hierarchy
+Speaker: Prof. Alan Miller
+Transcript:
+in recursive algorithm execution a stack pointer overflow caused the volatile memory stack to crash corrupting heap allocations and illustrating why caching and memory management units are essential in modern microprocessor design.

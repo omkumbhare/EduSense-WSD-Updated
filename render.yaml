@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: edusense-wsd
+    runtime: python
+    buildCommand: pip install -r requirements.txt && python -c "from src.utils import ensure_nltk_resources; ensure_nltk_resources()"
+    startCommand: gunicorn app:app
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: FLASK_ENV
+        value: production

@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}EduSense — Home Dashboard{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="row align-items-center mb-5">
+    <div class="col-lg-8">
+        <span class="badge bg-primary bg-opacity-25 text-info px-3 py-2 rounded-pill mb-3">
+            <i class="fa-solid fa-graduation-cap me-1"></i> MT-AIML Mini-Project | Problem 13
+        </span>
+        <h1 class="display-4 fw-bold mb-3">
+            Word Sense Disambiguation for <span class="brand-gradient">Educational Transcripts</span>
+        </h1>
+        <p class="lead text-muted mb-4">
+            EduSense uses transparent dictionary definition gloss matching, context windowing, and thesaurus synonym expansion powered by <strong>WordNet</strong> to determine the exact academic meaning of ambiguous vocabulary in lecture transcripts—without relying on external LLM APIs.
+        </p>
+        <div class="d-flex flex-wrap gap-3">
+            <a href="{{ url_for('analyzer') }}" class="btn btn-cyan btn-lg">
+                <i class="fa-solid fa-play me-2"></i> Launch WSD Analyzer
+            </a>
+            <a href="{{ url_for('evaluation') }}" class="btn btn-outline-custom btn-lg">
+                <i class="fa-solid fa-chart-pie me-2"></i> View Benchmark Results
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-4 d-none d-lg-block text-center">
+        <div class="glass-card p-4">
+            <i class="fa-solid fa-network-wired text-info display-1 mb-3"></i>
+            <h5 class="fw-bold">Pure NLP Engine</h5>
+            <p class="small text-muted mb-0">Transparent mathematical overlap scoring using WordNet synsets, lemmas, and thesaurus relations.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Dynamic Benchmark Performance Stats Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3 col-6">
+        <div class="glass-card stat-box">
+            <div class="stat-number">{{ eval_summary.total_samples }}</div>
+            <div class="stat-label">Test Transcripts</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="glass-card stat-box">
+            <div class="stat-number " style="background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                {{ eval_summary.custom_accuracy }}%
+            </div>
+            <div class="stat-label">Custom Engine Accuracy</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="glass-card stat-box">
+            <div class="stat-number " style="background: linear-gradient(135deg, #f59e0b, #d97706); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                {{ eval_summary.baseline_accuracy }}%
+            </div>
+            <div class="stat-label">NLTK Lesk Baseline</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="glass-card stat-box">
+            <div class="stat-number">{{ eval_summary.avg_candidate_senses }}</div>
+            <div class="stat-label">Avg Senses / Word</div>
+        </div>
+    </div>
+</div>
+
+<!-- Core NLP Disambiguation Pipeline -->
+<div class="glass-card p-4 mb-5">
+    <h3 class="fw-bold mb-4 text-center">
+        <i class="fa-solid fa-diagram-project text-cyan me-2"></i> Core WSD Processing Pipeline
+    </h3>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="pipeline-step">
+                <span class="badge bg-secondary mb-2">Step 1</span>
+                <h6 class="fw-bold text-light"><i class="fa-solid fa-file-lines text-info me-2"></i> Transcript & Target Input</h6>
+                <p class="small text-muted mb-0">Accepts educational lecture text and identifies the ambiguous target vocabulary item.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pipeline-step">
+                <span class="badge bg-secondary mb-2">Step 2</span>
+                <h6 class="fw-bold text-light"><i class="fa-solid fa-scissors text-info me-2"></i> Context Extraction</h6>
+                <p class="small text-muted mb-0">Extracts a configurable surrounding window (default ±10 words) around target occurrences.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pipeline-step">
+                <span class="badge bg-secondary mb-2">Step 3</span>
+                <h6 class="fw-bold text-light"><i class="fa-solid fa-gears text-info me-2"></i> Text Normalization</h6>
+                <p class="small text-muted mb-0">Lowercasing, tokenization, stop-word filtering, POS tagging, and NLTK lemmatization.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pipeline-step">
+                <span class="badge bg-secondary mb-2">Step 4</span>
+                <h6 class="fw-bold text-light"><i class="fa-solid fa-book text-info me-2"></i> WordNet Synset Retrieval</h6>
+                <p class="small text-muted mb-0">Fetches all candidate senses, definitions (glosses), examples, hypernyms, and hyponyms.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pipeline-step">
+                <span class="badge bg-secondary mb-2">Step 5</span>
+                <h6 class="fw-bold text-light"><i class="fa-solid fa-synagogue text-info me-2"></i> Thesaurus Expansion</h6>
+                <p class="small text-muted mb-0">Expands context vocabulary with WordNet synonyms to handle semantic paraphrase matching.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pipeline-step">
+                <span class="badge bg-secondary mb-2">Step 6</span>
+                <h6 class="fw-bold text-light"><i class="fa-solid fa-calculator text-info me-2"></i> Multi-Factor Scoring & Ranking</h6>
+                <p class="small text-muted mb-0">Computes weighted direct, lemma, example, synonym, and hypernym overlap scores to rank candidate senses.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Overview -->
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100">
+            <div class="text-cyan mb-3"><i class="fa-solid fa-filter-circle-dollar fa-2x"></i></div>
+            <h5 class="fw-bold">No External AI APIs</h5>
+            <p class="text-muted small">Built purely using fundamental NLP concepts, NLTK WordNet, and transparent scoring formulas without black-box LLM dependencies.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100">
+            <div class="text-cyan mb-3"><i class="fa-solid fa-eye fa-2x"></i></div>
+            <h5 class="fw-bold">Explainable AI (XAI)</h5>
+            <p class="text-muted small">Displays matched evidence tokens, scoring breakdowns, synonym expansions, and relative confidence for complete evaluator clarity.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100">
+            <div class="text-cyan mb-3"><i class="fa-solid fa-vial-circle-check fa-2x"></i></div>
+            <h5 class="fw-bold">Empirical Evaluation</h5>
+            <p class="text-muted small">Includes a 25-sample educational benchmark dataset evaluated against NLTK Simplified Lesk baseline with interactive visualizations.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

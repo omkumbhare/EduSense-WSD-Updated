@@ -1,0 +1,24 @@
+=== Sample 1: Geology & Physical Geography ===
+Target: bank
+Transcript:
+Today in physical geography, we will examine river mechanics and how water erosion reshapes surrounding land. The river bank undergoes severe soil degradation during monsoon floods, carrying sediment downstream into the valley delta.
+
+=== Sample 2: Macroeconomics & Banking ===
+Target: bank
+Transcript:
+In our macroeconomics lecture on monetary policy, we analyze how a commercial bank accepts customer deposits, provides business loans, and adjusts interest rates in accordance with central monetary reserve requirements.
+
+=== Sample 3: Cellular Biology ===
+Target: cell
+Transcript:
+In cellular biology, we examine the eukaryotic cell membrane, cytoplasm, and nucleus. Mitochondria generate adenosine triphosphate energy within the cell structure to sustain metabolic cellular functions.
+
+=== Sample 4: Industrial Engineering ===
+Target: plant
+Transcript:
+During our industrial manufacturing lecture, students visited the automated assembly plant to observe robotics, conveyor belt systems, and high-efficiency factory production lines.
+
+=== Sample 5: Computer Science Memory Management ===
+Target: memory
+Transcript:
+In operating systems and computer architecture, volatile random-access memory stores active process data, while hardware caches minimize latency between the CPU register and electronic memory modules.

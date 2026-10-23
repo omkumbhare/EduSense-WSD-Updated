@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}EduSense — Analysis Results{% endblock %}
+
+{% block content %}
+{% if not result or not result.success %}
+<div class="row justify-content-center my-5">
+    <div class="col-lg-8">
+        <div class="glass-card p-5 text-center">
+            <i class="fa-solid fa-circle-exclamation text-warning display-3 mb-3"></i>
+            <h3 class="fw-bold">Analysis Error</h3>
+            <p class="text-muted">{{ result.error_message if result else "An unexpected error occurred during WSD processing." }}</p>
+            <a href="{{ url_for('analyzer') }}" class="btn btn-cyan mt-3">
+                <i class="fa-solid fa-arrow-left me-2"></i> Return to Analyzer
+            </a>
+        </div>
+    </div>
+</div>
+{% else %}
+
+<!-- Results Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">
+            <i class="fa-solid fa-square-poll-vertical text-cyan me-2"></i> Disambiguation Results
+        </h2>
+        <p class="text-muted mb-0">Target Word: <span class="text-cyan fw-bold">'{{ result.target_word }}'</span> | Found {{ result.candidate_count }} candidate senses</p>
+    </div>
+    <div>
+        <a href="{{ url_for('analyzer') }}" class="btn btn-outline-custom btn-sm">
+            <i class="fa-solid fa-rotate-left me-1"></i> New Analysis
+        </a>
+    </div>
+</div>
+
+<!-- Row 1: Extracted Context & Predicted Sense Spotlight -->
+<div class="row g-4 mb-4">
+    <!-- Extracted Context Window Card -->
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100">
+            <h5 class="fw-bold mb-3 text-light">
+                <i class="fa-solid fa-quote-left text-info me-2"></i> Extracted Context Window (±{{ result.context_info.window_size }} words)
+            </h5>
+            <div class="p-3 rounded result-context mb-3 fs-5" style="line-height: 1.8;">
+                {{ result.context_info.highlighted_html|safe }}
+            </div>
+            <div class="small text-muted d-flex justify-content-between">
+                <span>Occurrence: {{ result.context_info.selected_occurrence + 1 }} of {{ result.context_info.occurrence_count }}</span>
+                <span>Tokens in window: {{ result.context_info.context_tokens|length }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Predicted Sense Spotlight Card -->
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100 border-cyan" style="border-width: 2px;">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-success px-3 py-2 rounded-pill font-monospace">
+                    <i class="fa-solid fa-trophy me-1"></i> Rank #1 — Predicted Sense
+                </span>
+                <span class="badge bg-info text-dark font-monospace">{{ result.predicted_sense.pos_display }}</span>
+            </div>
+
+            <h3 class="fw-bold text-cyan mb-2 font-monospace">{{ result.predicted_sense.synset_name }}</h3>
+            <p class="lead text-light mb-3">"{{ result.predicted_sense.definition }}"</p>
+
+            {% if result.predicted_sense.examples %}
+            <div class="small text-muted italic mb-3">
+                <i class="fa-solid fa-comment-dots me-1"></i> Example: <em>"{{ result.predicted_sense.examples[0] }}"</em>
+            </div>
+            {% endif %}
+
+            <!-- Relative Confidence Progress Bar -->
+            <div class="mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small text-muted fw-bold">Relative Confidence</span>
+                    <span class="small text-cyan fw-bold">{{ (result.relative_confidence * 100)|round(1) }}%</span>
+                </div>
+                <div class="progress progress-custom">
+                    <div class="progress-bar progress-bar-cyan" role="progressbar" 
+                        style="width: {{ (result.relative_confidence * 100)|round(1) }}%;"></div>
+                </div>
+                <div class="form-text text-muted small mt-1">
+                    Relative score proportion: Top Score ({{ result.predicted_sense.final_score }}) / Sum of All Scores
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 2: Text Preprocessing Pipeline Breakdown -->
+<div class="glass-card p-4 mb-4">
+    <h5 class="fw-bold mb-3 text-light">
+        <i class="fa-solid fa-filter text-cyan me-2"></i> Transparent Text Preprocessing Pipeline
+    </h5>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="p-3 bg-dark bg-opacity-50 rounded border border-secondary h-100">
+                <span class="badge bg-secondary mb-2">Stage 1: Tokens</span>
+                <div class="small text-muted font-monospace text-break">
+                    {{ result.preprocessing_steps.tokens|join(' • ') }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 bg-dark bg-opacity-50 rounded border border-secondary h-100">
+                <span class="badge bg-secondary mb-2">Stage 2: Filtered Tokens</span>
+                <div class="small text-info font-monospace text-break">
+                    {{ result.preprocessing_steps.filtered_tokens|join(' • ') }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 bg-dark bg-opacity-50 rounded border border-secondary h-100">
+                <span class="badge bg-secondary mb-2">Stage 3: Lemmatized Tokens</span>
+                <div class="small text-cyan font-monospace text-break">
+                    {{ result.preprocessing_steps.unique_lemmas|join(' • ') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 3: Explanation & Matched Evidence -->
+<div class="glass-card p-4 mb-4">
+    <h5 class="fw-bold mb-3 text-light">
+        <i class="fa-solid fa-lightbulb text-warning me-2"></i> Decision Explanation & Evidence Breakdown
+    </h5>
+    <p class="text-light mb-3">{{ result.explanation.explanation_text }}</p>
+
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="p-3 bg-dark bg-opacity-50 rounded border border-secondary">
+                <h6 class="small text-muted uppercase font-monospace mb-2">Direct Exact Matches</h6>
+                {% if result.predicted_sense.direct_matches %}
+                    {% for w in result.predicted_sense.direct_matches %}
+                        <span class="badge-evidence">{{ w }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-muted small">None</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="p-3 bg-dark bg-opacity-50 rounded border border-secondary">
+                <h6 class="small text-muted uppercase font-monospace mb-2">Lemma Gloss Matches</h6>
+                {% if result.predicted_sense.lemma_matches %}
+                    {% for w in result.predicted_sense.lemma_matches %}
+                        <span class="badge-evidence" style="color: #4facfe; border-color: rgba(79,172,254,0.4);">{{ w }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-muted small">None</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="p-3 bg-dark bg-opacity-50 rounded border border-secondary">
+                <h6 class="small text-muted uppercase font-monospace mb-2">Example Sentence Matches</h6>
+                {% if result.predicted_sense.example_matches %}
+                    {% for w in result.predicted_sense.example_matches %}
+                        <span class="badge-evidence" style="color: #10b981; border-color: rgba(16,185,129,0.4);">{{ w }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-muted small">None</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="p-3 bg-dark bg-opacity-50 rounded border border-secondary">
+                <h6 class="small text-muted uppercase font-monospace mb-2">Thesaurus Synonym Matches</h6>
+                {% if result.predicted_sense.synonym_matches %}
+                    {% for w in result.predicted_sense.synonym_matches %}
+                        <span class="badge-evidence" style="color: #f59e0b; border-color: rgba(245,158,11,0.4);">{{ w }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-muted small">None</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 4: Candidate Sense Ranking Table -->
+<div class="glass-card p-4 mb-4">
+    <h5 class="fw-bold mb-3 text-light">
+        <i class="fa-solid fa-list-ol text-cyan me-2"></i> All Candidate WordNet Senses & Score Ranking
+    </h5>
+    <div class="table-responsive">
+        <table class="table table-dark-custom align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 60px;">Rank</th>
+                    <th style="width: 160px;">Synset</th>
+                    <th style="width: 80px;">POS</th>
+                    <th>WordNet Definition</th>
+                    <th style="width: 90px;" class="text-center">Direct</th>
+                    <th style="width: 90px;" class="text-center">Synonym</th>
+                    <th style="width: 90px;" class="text-center">Hyper</th>
+                    <th style="width: 110px;" class="text-center">Total Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cand in result.candidate_rankings %}
+                <tr class="{% if cand.rank == 1 %}table-active bg-cyan bg-opacity-10{% endif %}">
+                    <td>
+                        {% if cand.rank == 1 %}
+                            <span class="badge bg-success rounded-circle p-2"><i class="fa-solid fa-crown"></i></span>
+                        {% else %}
+                            <span class="badge bg-secondary p-2">#{{ cand.rank }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="font-monospace fw-bold {% if cand.rank == 1 %}text-cyan{% endif %}">
+                        {{ cand.synset_name }}
+                    </td>
+                    <td><span class="badge bg-dark border border-secondary">{{ cand.pos_display }}</span></td>
+                    <td class="small text-muted">{{ cand.definition }}</td>
+                    <td class="text-center font-monospace">{{ cand.direct_score }}</td>
+                    <td class="text-center font-monospace">{{ cand.synonym_score }}</td>
+                    <td class="text-center font-monospace">{{ cand.hyper_score }}</td>
+                    <td class="text-center font-monospace fw-bold text-cyan">{{ cand.final_score }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endif %}
+{% endblock %}
